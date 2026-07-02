@@ -4,6 +4,7 @@ version: '3'
 
 vars:
   DOCKER_COMPOSE: "docker-compose.yaml"
+  APP_CONTAINER: "app"
 
 tasks:
   default:
@@ -15,25 +16,35 @@ tasks:
     cmd: docker compose --file {{.DOCKER_COMPOSE}} {{.CLI_ARGS}}
     silent: true
 
+  dcexec:
+    internal: true
+    cmds:
+      - task: dc
+        vars: { CLI_ARGS: 'exec {{.CLI_ARGS}}' }
+
   artisan:
     desc: example= task artisan -- migrate
     cmds:
-      - docker compose --file {{.DOCKER_COMPOSE}} exec app php artisan {{.CLI_ARGS}}
+      - task: dcexec
+        vars: { CLI_ARGS: '{{.APP_CONTAINER}} php artisan {{.CLI_ARGS}}' }
     silent: true
 
   composer:
     desc: example= task composer -- i
     cmds:
-      - docker compose --file {{.DOCKER_COMPOSE}} exec app composer {{.CLI_ARGS}}
+      - task: dcexec
+        vars: { CLI_ARGS: '{{.APP_CONTAINER}} composer {{.CLI_ARGS}}' }
     silent: true
 
   setup:
     desc: Use on first launch
     silent: true
     cmds:
-      - cp -n .env.example .env
-      - docker compose --file {{.DOCKER_COMPOSE}} build --no-cache
-      - docker compose --file {{.DOCKER_COMPOSE}} up -d --force-recreate --remove-orphans
+      - cmd: "cp -n .env.example .env"
+      - task: dc
+        vars: { CLI_ARGS: 'build --no-cache' }
+      - task: dc
+        vars: { CLI_ARGS: 'up -d --force-recreate --remove-orphans' }
       - task: composer
         vars: { CLI_ARGS: 'install' }
       - task: artisan
@@ -42,6 +53,8 @@ tasks:
         vars: { CLI_ARGS: 'migrate:fresh' }
       - task: artisan
         vars: { CLI_ARGS: 'db:seed' }
+      - task: artisan
+        vars: { CLI_ARGS: 'filament:assets' }
 
   up:
     silent: true
@@ -49,17 +62,21 @@ tasks:
           If you want to do the same with build, write \n
           example= task up -- build"
     cmds:
-      - cmd: docker compose --file {{.DOCKER_COMPOSE}} build
+      - task: dc
         if: '{{eq .CLI_ARGS "build"}}'
-      - docker compose --file {{.DOCKER_COMPOSE}} down
-      - docker compose --file {{.DOCKER_COMPOSE}} up -d --force-recreate
+        vars: { CLI_ARGS: 'build' }
+      - task: dc
+        vars: { CLI_ARGS: 'down' }
+      - task: dc
+        vars: { CLI_ARGS: 'up -d --force-recreate' }
 
   down:
     silent: true
     cmds:
-      - docker compose --file {{.DOCKER_COMPOSE}} down
+      - task: dc
+        vars: { CLI_ARGS: 'down' }
 
-  app-cheach-clear:
+  app-cache-clear:
     silent: true
     aliases:
       - 'appcc'
