@@ -53,6 +53,33 @@ services:
         networks:
             - app-network
 
+    redis:
+        image: redis:7-alpine
+        restart: unless-stopped
+        ports:
+            - "127.0.0.1:6379:6379"
+        volumes:
+            - redis-data:/data
+        networks:
+            - app-network
+
+    queue-worker:
+        build:
+            context: .
+            dockerfile: docker/php/Dockerfile
+        restart: unless-stopped
+        working_dir: /var/www/html
+        volumes:
+            - ./:/var/www/html
+            - ./storage:/var/www/html/storage
+            - ./bootstrap/cache:/var/www/html/bootstrap/cache
+        command: php artisan queue:work redis --sleep=3 --tries=3 --max-time=60
+        depends_on:
+            - app
+            - redis
+        networks:
+            - app-network
+
     adminer:
         image: adminer:4.8.1
         restart: unless-stopped
@@ -69,3 +96,4 @@ networks:
 volumes:
     postgres-data:
     composer_cache:
+    redis-data:
