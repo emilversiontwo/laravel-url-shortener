@@ -5,7 +5,7 @@ version: '3'
 vars:
   DOCKER_COMPOSE: "docker-compose.yaml"
   APP_CONTAINER: "app"
-  COMPOSE_PROD: docker compose --file docker-compose.prod.yml
+  COMPOSE_PROD: docker compose --file docker-compose.prod.yaml
 
 tasks:
   default:
