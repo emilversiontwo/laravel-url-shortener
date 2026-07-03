@@ -28,7 +28,9 @@ class ShortUrlResource extends Resource
                     ->url()
                     ->required(),
                 Forms\Components\TextInput::make('alias')
-                    ->required()
+                    ->helperText("Оставьте пустым для автоматической генерации")
+                    ->placeholder('Только буквы и цифры, 3-20 символов')
+                    ->regex('/^[a-zA-Z0-9]{3,20}$/')
                     ->unique(),
             ]);
     }
@@ -39,11 +41,19 @@ class ShortUrlResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('url'),
                 Tables\Columns\TextColumn::make('alias'),
-                Tables\Columns\TextColumn::make('clicks_count')
-                    ->label('Кликов')
-                    ->counts('shortUrlClicks')
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at'),
+                Tables\Columns\TextColumn::make('short_url')
+                    ->label('Короткая ссылка')
+                    ->getStateUsing(function ($record) {
+                        return route('shortUrl.click', $record->alias);
+                    })
+                    ->url(fn ($record) => route('shortUrl.click', $record->alias))
+                    ->copyable()
+                    ->copyMessage('Ссылка скопирована!')
+                    ->limit(40)
+                    ->tooltip(fn ($record) => route('shortUrl.click', $record->alias))
+                    ->icon('heroicon-o-link')
+                    ->color('primary'),
             ])
             ->filters([
                 //

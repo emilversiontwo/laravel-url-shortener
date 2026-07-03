@@ -19,6 +19,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class ShortUrlClick extends Model
 {
+    protected $fillable = [
+        'short_url_id',
+        'ip_address',
+        'user_agent',
+        'referer',
+        'country',
+        'clicked_at',
+    ];
+
     public function shortUrl(): BelongsTo
     {
         return $this->belongsTo(ShortUrl::class);

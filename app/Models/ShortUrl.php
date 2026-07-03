@@ -2,7 +2,10 @@
 
 namespace App\Models;
 
+use App\Observers\ShortUrl\ShortUrlObserver;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -15,7 +18,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property User $user
+ * @property Collection<ShortUrlClick> $shortUrlClicks
  */
+#[ObservedBy(ShortUrlObserver::class)]
 class ShortUrl extends Model
 {
     protected $fillable = [

@@ -16,7 +16,10 @@ return new class extends Migration {
 
             $table->index(['user_id', 'alias']);
 
-            $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('user_id')
+                ->references('id')
+                ->on('users')
+                ->cascadeOnDelete();
         });
     }
 

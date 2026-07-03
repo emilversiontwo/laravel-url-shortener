@@ -8,6 +8,7 @@ use App\Models\ShortUrl;
 use App\Models\ShortUrlClick;
 use App\Services\ShortUrl\Dto\ShortUrlClickDto;
 use Illuminate\Support\Facades\Cache;
+use Str;
 
 class ShortUrlService
 {
@@ -39,6 +40,15 @@ class ShortUrlService
         $shortUrlClick->shortUrl()->associate($shortUrl);
 
         $shortUrlClick->save();
+    }
+
+    public function generateAlias(): string
+    {
+        do {
+            $alias = Str::random(6);
+        } while (ShortUrl::where('alias', $alias)->exists());
+
+        return $alias;
     }
 
     protected function getCachedShortUrl(string $alias): ShortUrl

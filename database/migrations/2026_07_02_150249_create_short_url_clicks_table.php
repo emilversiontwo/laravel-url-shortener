@@ -20,7 +20,10 @@ return new class extends Migration {
             $table->index(['short_url_id', 'clicked_at']);
             $table->index('clicked_at');
 
-            $table->foreign('short_url_id')->references('id')->on('short_urls');
+            $table->foreign('short_url_id')
+                ->references('id')
+                ->on('short_urls')
+                ->cascadeOnDelete();
         });
     }
 

@@ -19,18 +19,14 @@ class ProcessShortUrlClickJob implements ShouldQueue
     public int $tries = 3;
     public array $backoff = [10, 60, 300];
 
-    private readonly ShortUrlService  $shortUrlService;
-
     public function __construct(
         private readonly ShortUrlClickDto $dto,
     )
-    {
-        $this->shortUrlService = app(ShortUrlService::class);
-    }
+    {}
 
-    public function handle(): void
+    public function handle(ShortUrlService $shortUrlService): void
     {
-        $this->shortUrlService->recordClick($this->dto);
+        $shortUrlService->recordClick($this->dto);
     }
 
     public function fail(Throwable $exception): void
