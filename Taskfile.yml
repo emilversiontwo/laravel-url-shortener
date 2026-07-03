@@ -139,8 +139,8 @@ tasks:
   deploy:init:
     desc: Initialize production environment
     cmds:
-      - cp .env.production.example .env.production
-      - echo "Created .env.production. Edit it with your settings."
+      - cp .env.production.example .env
+      - echo "Created .env. Edit it with your settings."
 
   deploy:update:
     desc: Update production (after git pull)

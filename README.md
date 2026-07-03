@@ -132,8 +132,8 @@ cd laravel-url-shortener
 # 2. Инициализировать production окружение
 task deploy:init
 
-# 3. Отредактировать .env.production
-nano .env.production
+# 3. Отредактировать .env
+nano .env
 
 # 4. Запустить деплой
 task deploy
@@ -239,7 +239,7 @@ SESSION_DRIVER=redis
 QUEUE_CONNECTION=redis
 ```
 
-### Production (.env.production)
+### Production (.env)
 
 ```env
 APP_NAME="URL Shortener"
