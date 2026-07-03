@@ -132,9 +132,15 @@ tasks:
       - echo "Deployment completed!"
       - echo ""
       - echo "Next steps:"
-      - echo "1. Configure Caddy to proxy s.soupik.ru -> localhost:8080"
+      - echo "1. Configure Caddy to proxy s.soupik.ru -> localhost:port"
       - echo "2. Check logs - {{.COMPOSE_PROD}} logs -f app"
       - echo "3. Horizon UI - https://s.soupik.ru/horizon"
+
+  deploy:init:
+    desc: Initialize production environment
+    cmds:
+      - cp .env.production.example .env.production
+      - echo "Created .env.production. Edit it with your settings."
 
   deploy:update:
     desc: Update production (after git pull)
