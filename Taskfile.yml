@@ -5,6 +5,7 @@ version: '3'
 vars:
   DOCKER_COMPOSE: "docker-compose.yaml"
   APP_CONTAINER: "app"
+  COMPOSE_PROD: docker compose --file docker-compose.prod.yml
 
 tasks:
   default:
@@ -96,3 +97,69 @@ tasks:
         vars: { CLI_ARGS: 'migrate:fresh' }
       - task: artisan
         vars: { CLI_ARGS: 'db:seed' }
+
+  deploy:
+    desc: Deploy to production
+    silent: true
+    cmds:
+      - echo "Starting production deployment..."
+
+      - echo "Building Docker images..."
+      - '{{.COMPOSE_PROD}} build --no-cache app'
+
+      - echo "Starting services..."
+      - '{{.COMPOSE_PROD}} up -d'
+
+      - echo "Waiting for database..."
+      - sleep 5
+
+      - echo "Generating APP_KEY..."
+      - '{{.COMPOSE_PROD}} exec -T app php artisan key:generate --force'
+
+      - echo "Running migrations..."
+      - '{{.COMPOSE_PROD}} exec -T app php artisan migrate --force'
+
+      - echo "Optimizing Laravel..."
+      - '{{.COMPOSE_PROD}} exec -T app php artisan config:cache'
+      - '{{.COMPOSE_PROD}} exec -T app php artisan route:cache'
+      - '{{.COMPOSE_PROD}} exec -T app php artisan view:cache'
+      - '{{.COMPOSE_PROD}} exec -T app php artisan event:cache'
+      - '{{.COMPOSE_PROD}} exec -T app php artisan horizon:publish'
+
+      - echo "Creating storage link..."
+      - '{{.COMPOSE_PROD}} exec -T app php artisan storage:link'
+
+      - echo "Deployment completed!"
+      - echo ""
+      - echo "Next steps:"
+      - echo "1. Configure Caddy to proxy s.soupik.ru -> localhost:8080"
+      - echo "2. Check logs - {{.COMPOSE_PROD}} logs -f app"
+      - echo "3. Horizon UI - https://s.soupik.ru/horizon"
+
+  deploy:update:
+    desc: Update production (after git pull)
+    silent: true
+    cmds:
+      - echo "Updating production..."
+      - '{{.COMPOSE_PROD}} build app'
+      - '{{.COMPOSE_PROD}} up -d'
+      - '{{.COMPOSE_PROD}} exec -T app php artisan migrate --force'
+      - '{{.COMPOSE_PROD}} exec -T app php artisan config:cache'
+      - '{{.COMPOSE_PROD}} exec -T app php artisan route:cache'
+      - '{{.COMPOSE_PROD}} exec -T app php artisan view:cache'
+      - echo "Update completed!"
+
+  deploy:logs:
+    desc: Show production logs
+    cmds:
+      - '{{.COMPOSE_PROD}} logs -f app'
+
+  deploy:stop:
+    desc: Stop production
+    cmds:
+      - '{{.COMPOSE_PROD}} down'
+
+  deploy:restart:
+    desc: Restart production
+    cmds:
+      - '{{.COMPOSE_PROD}} restart'
