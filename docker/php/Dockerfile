@@ -12,11 +12,13 @@ RUN set -eux; \
     ; \
     mkdir -p /tmp/pear/cache && chown -R www-data:www-data /tmp/pear; \
     pecl config-set temp_dir /tmp/pear || true; \
+    pecl install --onlyreqdeps --force redis \
     docker-php-ext-configure gd --with-jpeg --with-freetype; \
     docker-php-ext-install -j"$(nproc)" \
         gd pdo pdo_pgsql pgsql zip bcmath intl sockets opcache exif \
-        mbstring xml fileinfo \
+        mbstring xml fileinfo pcntl \
     ; \
+    docker-php-ext-enable redis.so \
     pecl clear-cache || true; \
     rm -rf /var/lib/apt/lists/* /tmp/pear/cache
 
